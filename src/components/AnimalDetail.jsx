@@ -38,9 +38,11 @@ export default function AnimalDetail({ animal, records = [], onBack, onAddMedica
           <div>
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-black text-white">{animal.name}</h1>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-800 text-emerald-400 border border-slate-700">
-                {animal.tagNumber || `#${animal.id}`}
-              </span>
+              {animal.tagNumber && (
+                <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-800 text-emerald-400 border border-slate-700">
+                  Pajuela: {animal.tagNumber}
+                </span>
+              )}
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 {animal.status || 'Sana'}
               </span>

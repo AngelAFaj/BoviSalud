@@ -187,7 +187,7 @@ export default function MedicalRecordFormModal({
               >
                 {animals.map((a) => (
                   <option key={a.id} value={a.id}>
-                    {a.name} ({a.category} - {a.tagNumber || `#${a.id}`}) [{a.status}]
+                    {a.name} ({a.category}{a.tagNumber ? ` - Pajuela: ${a.tagNumber}` : ''}) [{a.status}]
                   </option>
                 ))}
               </select>

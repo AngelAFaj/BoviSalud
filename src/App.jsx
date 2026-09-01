@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, seedInitialData } from './db/database';
+import { syncEngine } from './services/syncEngine';
 
 import Header from './components/Header';
 import StatsOverview from './components/StatsOverview';
@@ -28,9 +29,15 @@ export default function App() {
   const catalog = useLiveQuery(() => db.catalog.toArray(), []) || [];
   const records = useLiveQuery(() => db.records.toArray(), []) || [];
 
-  // Seed initial data on first mount
+  // Seed initial data and auto-sync with Neon PostgreSQL on mount
   useEffect(() => {
-    seedInitialData();
+    async function initApp() {
+      await seedInitialData();
+      if (navigator.onLine) {
+        await syncEngine.syncWithNeon();
+      }
+    }
+    initApp();
   }, []);
 
   // --- Animal Handlers ---

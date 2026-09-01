@@ -11,7 +11,8 @@ import {
   Smartphone, 
   Server, 
   Cloud,
-  Code
+  Code,
+  Trash2
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { syncEngine } from '../services/syncEngine';
@@ -27,6 +28,15 @@ export default function BackupSyncManager({
   const [syncMsg, setSyncMsg] = useState('');
   const [uploadMessage, setUploadMessage] = useState('');
   const [showSqlSchema, setShowSqlSchema] = useState(false);
+
+  // Clear local IndexedDB cache manually
+  const handleClearLocal = async () => {
+    if (window.confirm('¿Deseas borrar toda la información almacenada localmente en el navegador para resincronizar con Neon?')) {
+      await syncEngine.clearLocalData();
+      setSyncMsg('Almacenamiento local limpiado.');
+      setSyncStatus('success');
+    }
+  };
 
   // Trigger manual sync with Neon Cloud
   const handleNeonSync = async () => {
@@ -157,14 +167,25 @@ export default function BackupSyncManager({
           </div>
         </div>
 
-        <button
-          onClick={handleNeonSync}
-          disabled={syncStatus === 'syncing'}
-          className="flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition-all shrink-0"
-        >
-          <RefreshCw className={`w-4 h-4 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
-          <span>{syncStatus === 'syncing' ? 'Sincronizando...' : 'Sincronizar con Neon Cloud'}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={handleNeonSync}
+            disabled={syncStatus === 'syncing'}
+            className="flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md transition-all"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+            <span>{syncStatus === 'syncing' ? 'Sincronizando...' : 'Sincronizar con Neon Cloud'}</span>
+          </button>
+
+          <button
+            onClick={handleClearLocal}
+            title="Limpiar datos locales del navegador"
+            className="flex items-center space-x-1.5 bg-slate-800 hover:bg-rose-900/60 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-700/50 font-semibold text-xs px-3 py-2.5 rounded-xl transition-all"
+          >
+            <Trash2 className="w-4 h-4 text-rose-400" />
+            <span>Limpiar Datos Locales</span>
+          </button>
+        </div>
       </div>
 
       {syncMsg && (
