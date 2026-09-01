@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "bovisalud",
   "private": true,
   "version": "1.0.0",
@@ -12,8 +12,10 @@
     "@neondatabase/serverless": "^0.10.4",
     "dexie": "^4.0.10",
     "dexie-react-hooks": "^1.1.7",
+    "lucide-react": "^0.475.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",
