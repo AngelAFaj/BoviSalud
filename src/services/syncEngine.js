@@ -30,7 +30,7 @@ export const syncEngine = {
       if (!pullData && viteDbUrl) {
         const sql = neon(viteDbUrl);
 
-        const dbAnimals = await sql`SELECT id, local_id, tag_number, name, category, gender, status, birth_date, notes FROM animals ORDER BY id ASC`;
+        const dbAnimals = await sql`SELECT id, local_id, tag_number, name, category, gender, status, birth_date, notes, nationality FROM animals ORDER BY id ASC`;
         const dbCatalog = await sql`SELECT id, local_id, title, category, default_dose, route, notes FROM catalog ORDER BY id ASC`;
         const dbRecords = await sql`SELECT id, local_id, animal_id, animal_name, datetime, indication_id, indication_title, category, dose, notes, created_offline FROM records ORDER BY datetime DESC`;
 
@@ -43,7 +43,8 @@ export const syncEngine = {
             gender: a.gender,
             status: a.status,
             birthDate: a.birth_date,
-            notes: a.notes
+            notes: a.notes,
+            nationality: a.nationality || ''
           })),
           catalog: dbCatalog.map(c => ({
             id: c.id,

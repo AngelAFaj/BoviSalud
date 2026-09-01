@@ -49,6 +49,7 @@ export default function AnimalDetail({ animal, records = [], onBack, onAddMedica
             </div>
             <p className="text-xs text-slate-400 mt-1">
               Categoría: <span className="text-slate-200 font-semibold">{animal.category}</span> • Sexo: <span className="text-slate-200 font-semibold">{animal.gender}</span>
+              {animal.nationality && ` • Nacionalidad: ${animal.nationality}`}
               {animal.birthDate && ` • Nacimiento: ${animal.birthDate}`}
             </p>
           </div>

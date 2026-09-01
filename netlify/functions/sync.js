@@ -31,7 +31,7 @@ export async function handler(event, context) {
   try {
     // 1. GET: Descargar datos desde Neon PostgreSQL (Pull)
     if (event.httpMethod === 'GET') {
-      const animals = await sql`SELECT id, local_id, tag_number, name, category, gender, status, birth_date, notes FROM animals ORDER BY id ASC`;
+      const animals = await sql`SELECT id, local_id, tag_number, name, category, gender, status, birth_date, notes, nationality FROM animals ORDER BY id ASC`;
       const catalog = await sql`SELECT id, local_id, title, category, default_dose, route, notes FROM catalog ORDER BY id ASC`;
       const records = await sql`SELECT id, local_id, animal_id, animal_name, datetime, indication_id, indication_title, category, dose, notes, created_offline FROM records ORDER BY datetime DESC`;
 
@@ -50,7 +50,8 @@ export async function handler(event, context) {
               gender: a.gender,
               status: a.status,
               birthDate: a.birth_date,
-              notes: a.notes
+              notes: a.notes,
+              nationality: a.nationality || ''
             })),
             catalog: catalog.map(c => ({
               id: c.id,
@@ -85,8 +86,8 @@ export async function handler(event, context) {
       // Insertar nuevos bovinos
       for (const a of newAnimals) {
         await sql`
-          INSERT INTO animals (local_id, tag_number, name, category, gender, status, birth_date, notes)
-          VALUES (${a.id || null}, ${a.tagNumber || ''}, ${a.name}, ${a.category || 'Vaca'}, ${a.gender || 'Hembra'}, ${a.status || 'Sana'}, ${a.birthDate || null}, ${a.notes || ''})
+          INSERT INTO animals (local_id, tag_number, name, category, gender, status, birth_date, notes, nationality)
+          VALUES (${a.id || null}, ${a.tagNumber || ''}, ${a.name}, ${a.category || 'Vaca'}, ${a.gender || 'Hembra'}, ${a.status || 'Sana'}, ${a.birthDate || null}, ${a.notes || ''}, ${a.nationality || ''})
         `;
       }
 

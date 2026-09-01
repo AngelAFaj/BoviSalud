@@ -4,7 +4,7 @@ export const db = new Dexie('GanadoMedDB');
 
 // Definir esquemas para Dexie IndexedDB
 db.version(1).stores({
-  animals: '++id, tagNumber, name, category, gender, status, birthDate, createdAt',
+  animals: '++id, tagNumber, name, category, gender, status, birthDate, nationality, createdAt',
   catalog: '++id, title, category, defaultDose, route, notes, createdAt',
   records: '++id, animalId, animalName, datetime, indicationId, indicationTitle, category, dose, notes, createdOffline',
   syncQueue: '++id, action, entity, data, timestamp'

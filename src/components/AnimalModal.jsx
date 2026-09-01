@@ -9,6 +9,7 @@ export default function AnimalModal({ isOpen, onClose, onSave, animalToEdit = nu
     gender: 'Hembra',
     status: 'Sana',
     birthDate: '',
+    nationality: '',
     notes: ''
   });
 
@@ -21,6 +22,7 @@ export default function AnimalModal({ isOpen, onClose, onSave, animalToEdit = nu
         gender: animalToEdit.gender || 'Hembra',
         status: animalToEdit.status || 'Sana',
         birthDate: animalToEdit.birthDate || '',
+        nationality: animalToEdit.nationality || '',
         notes: animalToEdit.notes || ''
       });
     } else {
@@ -31,6 +33,7 @@ export default function AnimalModal({ isOpen, onClose, onSave, animalToEdit = nu
         gender: 'Hembra',
         status: 'Sana',
         birthDate: '',
+        nationality: '',
         notes: ''
       });
     }
@@ -141,15 +144,29 @@ export default function AnimalModal({ isOpen, onClose, onSave, animalToEdit = nu
             </div>
           </div>
 
-          {/* Fecha Nacimiento */}
-          <div>
-            <label className="block font-semibold text-slate-300 mb-1">Fecha Aprox. de Nacimiento</label>
-            <input
-              type="date"
-              value={formData.birthDate}
-              onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-              className="w-full bg-slate-950 text-slate-100 px-3.5 py-2.5 rounded-xl border border-slate-800 focus:border-emerald-500 focus:outline-none text-base sm:text-sm"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Fecha Nacimiento */}
+            <div>
+              <label className="block font-semibold text-slate-300 mb-1">Fecha Aprox. de Nacimiento</label>
+              <input
+                type="date"
+                value={formData.birthDate}
+                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                className="w-full bg-slate-950 text-slate-100 px-3.5 py-2.5 rounded-xl border border-slate-800 focus:border-emerald-500 focus:outline-none text-base sm:text-sm"
+              />
+            </div>
+
+            {/* Nacionalidad */}
+            <div>
+              <label className="block font-semibold text-slate-300 mb-1">Nacionalidad / Origen</label>
+              <input
+                type="text"
+                placeholder="Ej. Holandesa, Americana, Colombiana"
+                value={formData.nationality}
+                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                className="w-full bg-slate-950 text-slate-100 px-3.5 py-2.5 rounded-xl border border-slate-800 focus:border-emerald-500 focus:outline-none text-base sm:text-sm"
+              />
+            </div>
           </div>
 
           {/* Notas */}

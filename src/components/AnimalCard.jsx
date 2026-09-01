@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stethoscope, Edit, Trash2, ChevronRight, Activity, Syringe } from 'lucide-react';
+import { Stethoscope, Edit, Trash2, ChevronRight, Activity, Syringe, Globe } from 'lucide-react';
 
 export default function AnimalCard({ animal, lastRecord, onViewTimeline, onAddMedical, onEdit, onDelete }) {
   // Status badge styling
@@ -48,12 +48,23 @@ export default function AnimalCard({ animal, lastRecord, onViewTimeline, onAddMe
           </span>
         </div>
 
-        {/* Pajuela Badge if present (Clean separate pill row) */}
-        {animal.tagNumber && (
-          <div className="flex items-center space-x-1.5 text-xs text-emerald-300 bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-800/40 w-fit">
-            <Syringe className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="font-semibold text-slate-300">Pajuela:</span>
-            <span className="font-bold text-emerald-300">{animal.tagNumber}</span>
+        {/* Pajuela & Nacionalidad Badges */}
+        {(animal.tagNumber || animal.nationality) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {animal.tagNumber && (
+              <div className="flex items-center space-x-1.5 text-xs text-emerald-300 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-800/40">
+                <Syringe className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="font-semibold text-slate-300">Pajuela:</span>
+                <span className="font-bold text-emerald-300">{animal.tagNumber}</span>
+              </div>
+            )}
+            {animal.nationality && (
+              <div className="flex items-center space-x-1.5 text-xs text-blue-300 bg-blue-950/40 px-2.5 py-1 rounded-xl border border-blue-800/40">
+                <Globe className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span className="font-semibold text-slate-300">Nacionalidad:</span>
+                <span className="font-bold text-blue-300">{animal.nationality}</span>
+              </div>
+            )}
           </div>
         )}
 
