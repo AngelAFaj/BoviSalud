@@ -1,137 +1,77 @@
 import { neon } from '@neondatabase/serverless';
+import { ensureSchema, pullAll, pushAll } from '../../src/services/neonRepository.js';
 
-export async function handler(event, context) {
-  // Configuración de encabezados CORS
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Content-Type': 'application/json'
+let schemaReady = false;
+
+function json(statusCode, body, extraHeaders = {}) {
+  return {
+    statusCode,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Content-Type': 'application/json',
+      ...extraHeaders
+    },
+    body: JSON.stringify(body)
   };
+}
 
+export async function handler(event) {
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: JSON.stringify({ message: 'OK' }) };
+    return json(200, { message: 'OK' });
   }
 
   const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
 
   if (!databaseUrl) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ 
-        error: 'DATABASE_URL no configurada', 
-        message: 'Por favor configura la variable de entorno DATABASE_URL en Netlify' 
-      })
-    };
+    return json(500, {
+      error: 'DATABASE_URL no configurada',
+      message: 'Configura la variable de entorno DATABASE_URL en Netlify con la cadena de Neon.'
+    });
   }
 
   const sql = neon(databaseUrl);
 
   try {
-    // 1. GET: Descargar datos desde Neon PostgreSQL (Pull)
+    if (!schemaReady) {
+      await ensureSchema(sql);
+      schemaReady = true;
+    }
+
     if (event.httpMethod === 'GET') {
-      const animals = await sql`SELECT id, local_id, tag_number, name, category, gender, status, birth_date, notes, nationality FROM animals ORDER BY id ASC`;
-      const catalog = await sql`SELECT id, local_id, title, category, default_dose, route, notes FROM catalog ORDER BY id ASC`;
-      const records = await sql`SELECT id, local_id, animal_id, animal_name, datetime, indication_id, indication_title, category, dose, notes, created_offline FROM records ORDER BY datetime DESC`;
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          timestamp: new Date().toISOString(),
-          data: {
-            animals: animals.map(a => ({
-              id: a.id,
-              tagNumber: a.tag_number,
-              name: a.name,
-              category: a.category,
-              gender: a.gender,
-              status: a.status,
-              birthDate: a.birth_date,
-              notes: a.notes,
-              nationality: a.nationality || ''
-            })),
-            catalog: catalog.map(c => ({
-              id: c.id,
-              title: c.title,
-              category: c.category,
-              defaultDose: c.default_dose,
-              route: c.route,
-              notes: c.notes
-            })),
-            records: records.map(r => ({
-              id: r.id,
-              animalId: r.animal_id,
-              animalName: r.animal_name,
-              datetime: r.datetime,
-              indicationId: r.indication_id,
-              indicationTitle: r.indication_title,
-              category: r.category,
-              dose: r.dose,
-              notes: r.notes,
-              createdOffline: r.created_offline
-            }))
-          }
-        })
-      };
+      const data = await pullAll(sql);
+      return json(200, {
+        success: true,
+        timestamp: new Date().toISOString(),
+        data
+      });
     }
 
-    // 2. POST: Subir datos desde el cliente offline hacia Neon PostgreSQL (Push)
     if (event.httpMethod === 'POST') {
-      const body = JSON.parse(event.body || '{}');
-      const { newAnimals = [], newCatalog = [], newRecords = [] } = body;
-
-      // Insertar nuevos bovinos
-      for (const a of newAnimals) {
-        await sql`
-          INSERT INTO animals (local_id, tag_number, name, category, gender, status, birth_date, notes, nationality)
-          VALUES (${a.id || null}, ${a.tagNumber || ''}, ${a.name}, ${a.category || 'Vaca'}, ${a.gender || 'Hembra'}, ${a.status || 'Sana'}, ${a.birthDate || null}, ${a.notes || ''}, ${a.nationality || ''})
-        `;
+      let payload = {};
+      try {
+        payload = JSON.parse(event.body || '{}');
+      } catch {
+        return json(400, { error: 'JSON inválido', message: 'El cuerpo de la petición no es JSON válido.' });
       }
 
-      // Insertar nuevos ítems del catálogo
-      for (const c of newCatalog) {
-        await sql`
-          INSERT INTO catalog (local_id, title, category, default_dose, route, notes)
-          VALUES (${c.id || null}, ${c.title}, ${c.category || 'General'}, ${c.defaultDose || ''}, ${c.route || ''}, ${c.notes || ''})
-        `;
-      }
-
-      // Insertar nuevos registros médicos
-      for (const r of newRecords) {
-        await sql`
-          INSERT INTO records (local_id, animal_id, animal_name, datetime, indication_id, indication_title, category, dose, notes, created_offline)
-          VALUES (${r.animalId || null}, ${r.animalName}, ${r.datetime}, ${r.indicationId || null}, ${r.indicationTitle}, ${r.category || 'General'}, ${r.dose || ''}, ${r.notes || ''}, true)
-        `;
-      }
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          message: 'Sincronización con Neon exitosa',
-          inserted: {
-            animals: newAnimals.length,
-            catalog: newCatalog.length,
-            records: newRecords.length
-          }
-        })
-      };
+      const inserted = await pushAll(sql, payload);
+      return json(200, {
+        success: true,
+        message: 'Sincronización con Neon exitosa',
+        inserted: inserted.upserted,
+        deleted: inserted.deleted
+      });
     }
 
-    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Método no permitido' }) };
+    return json(405, { error: 'Método no permitido' });
   } catch (error) {
     console.error('Error en Netlify Function Sync:', error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({
-        error: 'Error al conectar con Neon PostgreSQL',
-        details: error.message
-      })
-    };
+    schemaReady = false;
+    return json(500, {
+      error: 'Error al conectar con Neon PostgreSQL',
+      details: error.message
+    });
   }
 }

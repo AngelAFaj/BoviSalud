@@ -162,7 +162,7 @@ export default function BackupSyncManager({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-              Tus atenciones médicas se guardan localmente sin latencia en la finca. Al recuperar señal de internet, presiona el botón para sincronizar con la base de datos central en <strong>Neon PostgreSQL</strong>.
+              El CRUD funciona siempre en este dispositivo. Sin internet los cambios se quedan locales; al volver la señal se <strong>empuja</strong> lo pendiente a Neon y luego se <strong>trae</strong> el estado de la nube. También puedes forzar la sincronización con el botón.
             </p>
           </div>
         </div>
@@ -283,8 +283,8 @@ export default function BackupSyncManager({
 
         <p className="text-xs text-slate-400 leading-relaxed">
           1. Crea una base de datos en <a href="https://neon.tech" target="_blank" rel="noreferrer" className="text-emerald-400 underline">Neon.tech</a>.<br />
-          2. En el panel de Netlify, agrega la variable de entorno: <code className="bg-slate-900 px-2 py-0.5 rounded text-emerald-300 font-mono">DATABASE_URL</code> con tu conexión de Neon.<br />
-          3. Ejecuta el script SQL en la consola SQL de Neon para crear las tablas <code className="bg-slate-900 px-1 rounded text-slate-300">animals</code>, <code className="bg-slate-900 px-1 rounded text-slate-300">catalog</code> y <code className="bg-slate-900 px-1 rounded text-slate-300">records</code>.
+          2. En el panel de Netlify, agrega la variable de entorno: <code className="bg-slate-900 px-2 py-0.5 rounded text-emerald-300 font-mono">DATABASE_URL</code> con tu conexión de Neon y vuelve a publicar el sitio.<br />
+          3. La función de sync crea las tablas si no existen. El script SQL de abajo es opcional, por si quieres revisarlas en Neon.
         </p>
 
         {showSqlSchema && (
@@ -292,7 +292,8 @@ export default function BackupSyncManager({
             <p className="text-slate-500">// Script SQL para Neon PostgreSQL (schema_neon.sql):</p>
             <pre className="text-slate-300">{`CREATE TABLE IF NOT EXISTS animals (
   id SERIAL PRIMARY KEY, local_id INT, tag_number VARCHAR(50), name VARCHAR(100),
-  category VARCHAR(50), gender VARCHAR(20), status VARCHAR(50), birth_date DATE, notes TEXT
+  category VARCHAR(50), gender VARCHAR(20), status VARCHAR(50), birth_date DATE,
+  notes TEXT, nationality TEXT
 );
 
 CREATE TABLE IF NOT EXISTS catalog (
